@@ -63,7 +63,7 @@ void Window::add_layer(const char* sequence, uint32_t sequence_length,
 }
 
 bool Window::generate_consensus(std::shared_ptr<spoa::AlignmentEngine> alignment_engine,
-    bool trim) {
+    bool trim, FILE* fp) {
 
     if (sequences_.size() < 3) {
         consensus_ = std::string(sequences_.front().first, sequences_.front().second);
@@ -74,6 +74,9 @@ bool Window::generate_consensus(std::shared_ptr<spoa::AlignmentEngine> alignment
     graph->add_alignment(spoa::Alignment(), sequences_.front().first,
         sequences_.front().second, qualities_.front().first,
         qualities_.front().second);
+
+    // Arun: print target
+    fprintf(fp, ">0\n%.*s\n", sequences_.front().second, sequences_.front().first);
 
     std::vector<uint32_t> rank;
     rank.reserve(sequences_.size());
@@ -87,6 +90,9 @@ bool Window::generate_consensus(std::shared_ptr<spoa::AlignmentEngine> alignment
     uint32_t offset = 0.01 * sequences_.front().second;
     for (uint32_t j = 1; j < sequences_.size(); ++j) {
         uint32_t i = rank[j];
+
+        // Arun: print query
+        fprintf(fp, ">%d\n%.*s\n", j, sequences_[i].second, sequences_[i].first);
 
         spoa::Alignment alignment;
         if (positions_[i].first < offset && positions_[i].second >

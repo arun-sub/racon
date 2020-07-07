@@ -487,6 +487,8 @@ void Polisher::polish(std::vector<std::unique_ptr<Sequence>>& dst,
 
     logger_->log();
 
+    FILE* input = fopen("input.fasta", "w");
+
     std::vector<std::future<bool>> thread_futures;
     for (uint64_t i = 0; i < windows_.size(); ++i) {
         thread_futures.emplace_back(thread_pool_->submit(
@@ -498,7 +500,7 @@ void Polisher::polish(std::vector<std::unique_ptr<Sequence>>& dst,
                     exit(1);
                 }
                 return windows_[j]->generate_consensus(
-                    alignment_engines_[it->second], trim_);
+                    alignment_engines_[it->second], trim_, input);
             }, i));
     }
 
@@ -544,6 +546,9 @@ void Polisher::polish(std::vector<std::unique_ptr<Sequence>>& dst,
 
     std::vector<std::shared_ptr<Window>>().swap(windows_);
     std::vector<std::unique_ptr<Sequence>>().swap(sequences_);
+
+    fclose(input);
+
 }
 
 }
